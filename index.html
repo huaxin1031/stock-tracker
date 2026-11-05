@@ -16,7 +16,7 @@
   </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-16">
-  <!-- 頂部導覽列 + 簡潔三分頁切換器 -->
+  <!-- 頂部導覽列 + 四分頁切換器 -->
   <header class="bg-slate-800/95 backdrop-blur border-b border-slate-700 sticky top-0 z-30">
     <div class="max-w-6xl mx-auto px-4 pt-3.5 pb-2 flex flex-wrap justify-between items-center gap-3">
       <div class="flex items-center space-x-2.5">
@@ -28,7 +28,7 @@
       </div>
 
       <div class="flex items-center space-x-2.5">
-        <!-- 帳號狀態膠囊 (點擊可跳轉至帳號與推播設定分頁) -->
+        <!-- 帳號狀態膠囊 -->
         <button onclick="switchMainTab('account')" id="headerUserBadge" class="bg-slate-900 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5">
           <span id="headerUserIcon">👤</span>
           <span id="headerUserText">未登入 (本地儲存)</span>
@@ -42,15 +42,19 @@
       </div>
     </div>
 
-    <!-- 導覽分頁列 (不寫分頁一/二/三，直接呈現功能名稱) -->
+    <!-- 導覽分頁列 (四個獨立分頁) -->
     <div class="max-w-6xl mx-auto px-4 mt-2 flex space-x-1 sm:space-x-2 border-t border-slate-700/60 pt-2 overflow-x-auto no-scrollbar">
       <button id="tabBtnChart" onclick="switchMainTab('chart')" class="flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-t-lg text-xs sm:text-sm font-bold whitespace-nowrap transition border-b-2 border-amber-400 text-amber-400 bg-slate-900/70 flex items-center justify-center space-x-1.5">
         <span>📊</span>
         <span>股價走勢與均線</span>
       </button>
+      <button id="tabBtnEditor" onclick="switchMainTab('editor')" class="flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-t-lg text-xs sm:text-sm font-bold whitespace-nowrap transition border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center justify-center space-x-1.5">
+        <span>✏️</span>
+        <span>編輯股票清單</span>
+      </button>
       <button id="tabBtnLadder" onclick="switchMainTab('ladder')" class="flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-t-lg text-xs sm:text-sm font-bold whitespace-nowrap transition border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center justify-center space-x-1.5">
         <span>🎯</span>
-        <span>乖離率階梯與清單</span>
+        <span>乖離率階梯檢視</span>
       </button>
       <button id="tabBtnAccount" onclick="switchMainTab('account')" class="flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-t-lg text-xs sm:text-sm font-bold whitespace-nowrap transition border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center justify-center space-x-1.5">
         <span>☁️</span>
@@ -60,7 +64,7 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 mt-5 space-y-5">
-    <!-- 狀態訊息列 (全分頁共用) -->
+    <!-- 狀態訊息列 -->
     <div id="statusAlert" class="hidden bg-slate-800 border-l-4 border-blue-500 text-slate-200 px-4 py-2.5 rounded-r-lg text-sm flex justify-between items-center shadow">
       <span id="statusText">準備就緒</span>
       <button onclick="document.getElementById('statusAlert').classList.add('hidden')" class="text-slate-400 hover:text-white">✕</button>
@@ -70,7 +74,6 @@
          【股價走勢與均線】分頁
          ========================================== -->
     <section id="tabContentChart" class="space-y-4">
-      <!-- 1. 股票快速切換膠囊列 -->
       <div class="bg-slate-800 border border-slate-700 rounded-xl p-3.5 shadow">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
           <span class="text-xs font-semibold text-slate-400">📌 選擇要檢視走勢的股票：</span>
@@ -82,10 +85,8 @@
         <div id="chartStockSelector" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1"></div>
       </div>
 
-      <!-- 2. 選中股票之即時關鍵數據摘要卡 -->
       <div id="chartSummaryCard" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
 
-      <!-- 3. 股價與均線互動走勢圖主體 -->
       <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-lg space-y-4">
         <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-700/80 pb-3">
           <div class="flex items-center space-x-2">
@@ -94,19 +95,16 @@
               🔄 刷新此檔
             </button>
           </div>
-          <!-- 顯示區間切換 (近 60 日 / 近半年) -->
           <div class="flex items-center space-x-1 bg-slate-900 p-1 rounded-lg border border-slate-700 text-xs">
             <button onclick="setChartRange(60)" id="rangeBtn60" class="px-2.5 py-1 rounded text-slate-300 hover:text-white transition">近 60 日</button>
             <button onclick="setChartRange(120)" id="rangeBtn120" class="px-2.5 py-1 rounded bg-slate-700 text-white font-semibold transition">近半年 (完整)</button>
           </div>
         </div>
 
-        <!-- 主圖：收盤價 + 均線 Canvas -->
         <div class="relative h-72 sm:h-80 w-full">
           <canvas id="priceMaChart"></canvas>
         </div>
 
-        <!-- 副圖：歷史乖離率 (%) 柱狀波動圖 -->
         <div class="pt-2 border-t border-slate-700/60">
           <div class="flex justify-between items-center mb-1">
             <span id="biasChartTitle" class="text-xs font-semibold text-slate-400">📊 歷史乖離率波動 (%)</span>
@@ -117,7 +115,6 @@
           </div>
         </div>
 
-        <!-- 4. 分頁下方：選擇看「月線 (20MA)」或「季線 (60MA)」大型控制列 -->
         <div class="pt-3 border-t border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-xl">
           <div class="text-xs text-slate-300 flex items-center space-x-2">
             <span class="text-base">🎛️</span>
@@ -139,79 +136,82 @@
     </section>
 
     <!-- ==========================================
-         【乖離率階梯與清單】分頁
+         【編輯股票清單】分頁 (獨立編輯頁面)
+         ========================================== -->
+    <section id="tabContentEditor" class="hidden space-y-6">
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
+        <h2 class="text-base font-bold text-white mb-2 flex flex-wrap items-center justify-between gap-2">
+          <span>✏️ 新增或手動編輯股票清單</span>
+          <span class="text-xs font-normal text-slate-400">台股直接輸入代號即可 (如 <code class="text-amber-400">2330</code>)，上櫃請加 <code class="text-amber-400">.TWO</code></span>
+        </h2>
+        <form id="stockForm" onsubmit="handleSaveStock(event)" class="grid grid-cols-2 sm:grid-cols-6 gap-3 pt-2">
+          <input type="hidden" id="editIndex" value="-1">
+          <div class="col-span-1">
+            <label class="block text-xs text-slate-400 mb-1">股票代號*</label>
+            <input type="text" id="symbolInput" placeholder="例: 2330" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 uppercase">
+          </div>
+          <div class="col-span-1">
+            <label class="block text-xs text-slate-400 mb-1">中文名稱</label>
+            <input type="text" id="nameInput" placeholder="例: 台積電" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="col-span-1">
+            <label class="block text-xs text-slate-400 mb-1">目前現價</label>
+            <input type="number" step="any" id="priceInput" placeholder="自動抓取" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="col-span-1">
+            <label class="block text-xs text-slate-400 mb-1">月線 (20MA)</label>
+            <input type="number" step="any" id="ma20Input" placeholder="自動抓取" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="col-span-1">
+            <label class="block text-xs text-slate-400 mb-1">季線 (60MA)</label>
+            <input type="number" step="any" id="ma60Input" placeholder="自動抓取" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="col-span-2 sm:col-span-1 flex items-end space-x-2">
+            <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-2 px-3 rounded-lg transition shadow">
+              儲存
+            </button>
+            <button type="button" id="cancelEditBtn" onclick="resetForm()" class="hidden bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm py-2 px-3 rounded-lg">
+              取消
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 目前追蹤清單管理總覽 -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+          <h3 class="text-sm font-bold text-white">📋 目前所有追蹤股票管理</h3>
+          <button onclick="resetToDefaults()" class="text-xs text-amber-400 hover:underline">重置為預設 6 檔清單</button>
+        </div>
+        <div id="editorStockTableList" class="space-y-2.5"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         【乖離率階梯檢視】分頁
          ========================================== -->
     <section id="tabContentLadder" class="hidden space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <!-- 新增或編輯股票表單 -->
-        <div class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-xl p-4 shadow">
-          <h2 class="text-sm font-semibold text-slate-300 mb-3 flex flex-wrap items-center justify-between gap-1">
-            <span>➕ 新增或手動編輯股票</span>
-            <span class="text-xs font-normal text-slate-400">台股直接輸入代號即可 (如 <code class="text-amber-400">2330</code>)，上櫃請加 <code class="text-amber-400">.TWO</code></span>
-          </h2>
-          <form id="stockForm" onsubmit="handleSaveStock(event)" class="grid grid-cols-2 sm:grid-cols-6 gap-2.5">
-            <input type="hidden" id="editIndex" value="-1">
-            <div class="col-span-1">
-              <label class="block text-xs text-slate-400 mb-1">股票代號*</label>
-              <input type="text" id="symbolInput" placeholder="例: 2330" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 uppercase">
-            </div>
-            <div class="col-span-1">
-              <label class="block text-xs text-slate-400 mb-1">中文名稱</label>
-              <input type="text" id="nameInput" placeholder="例: 台積電" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500">
-            </div>
-            <div class="col-span-1">
-              <label class="block text-xs text-slate-400 mb-1">目前現價</label>
-              <input type="number" step="any" id="priceInput" placeholder="自動抓取" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500">
-            </div>
-            <div class="col-span-1">
-              <label class="block text-xs text-slate-400 mb-1">月線 (20MA)</label>
-              <input type="number" step="any" id="ma20Input" placeholder="自動抓取" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500">
-            </div>
-            <div class="col-span-1">
-              <label class="block text-xs text-slate-400 mb-1">季線 (60MA)</label>
-              <input type="number" step="any" id="ma60Input" placeholder="自動抓取" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500">
-            </div>
-            <div class="col-span-2 sm:col-span-1 flex items-end space-x-1.5">
-              <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-1.5 px-3 rounded-lg transition">
-                儲存
-              </button>
-              <button type="button" id="cancelEditBtn" onclick="resetForm()" class="hidden bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm py-1.5 px-2.5 rounded-lg">
-                取消
-              </button>
-            </div>
-          </form>
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-300 mb-1">🎯 乖離率追蹤階梯設定 (%)</h2>
+          <p class="text-xs text-slate-400">可自由增減百分比（逗號分隔），自動換算目標價並同步雲端：</p>
         </div>
-
-        <!-- 乖離率警示門檻設定 -->
-        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow flex flex-col justify-between">
-          <div>
-            <h2 class="text-sm font-semibold text-slate-300 mb-1.5">🎯 乖離率追蹤階梯 (%)</h2>
-            <p class="text-xs text-slate-400 mb-2">可自由增減百分比（逗號分隔），自動換算目標價並同步雲端：</p>
-            <div class="flex space-x-2">
-              <input type="text" id="thresholdsInput" value="5, 10, 15, 20, 25" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500">
-              <button onclick="saveThresholds()" class="bg-slate-700 hover:bg-slate-600 text-xs text-white px-3 py-1.5 rounded-lg whitespace-nowrap transition">
-                套用階梯
-              </button>
-            </div>
-          </div>
-          <div class="mt-3 pt-2.5 border-t border-slate-700/70 flex items-center justify-between text-xs text-slate-400">
-            <span>配色：<span class="text-rose-400 font-medium">紅漲 (+乖離)</span> / <span class="text-emerald-400 font-medium">綠跌 (-乖離)</span></span>
-            <button onclick="resetToDefaults()" class="text-amber-400 hover:underline">重置預設清單</button>
-          </div>
+        <div class="flex w-full sm:w-auto space-x-2">
+          <input type="text" id="thresholdsInput" value="5, 10, 15, 20, 25" class="w-full sm:w-48 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500">
+          <button onclick="saveThresholds()" class="bg-slate-700 hover:bg-slate-600 text-xs text-white px-4 py-1.5 rounded-lg whitespace-nowrap transition">
+            套用階梯
+          </button>
         </div>
       </div>
 
-      <!-- 股票卡片清單 -->
       <div id="stockList" class="grid grid-cols-1 gap-4"></div>
     </section>
 
     <!-- ==========================================
-         【帳號與推播設定】分頁 (全新整合)
+         【帳號與推播設定】分頁
          ========================================== -->
     <section id="tabContentAccount" class="hidden space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        <!-- 左欄：Google 帳號登入與雲端同步管理 -->
         <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg space-y-4 flex flex-col justify-between">
           <div class="space-y-4">
             <div class="flex items-center justify-between border-b border-slate-700 pb-3">
@@ -225,7 +225,6 @@
               <span id="cloudSyncStatusBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300 font-medium">本地模式</span>
             </div>
 
-            <!-- 目前登入使用者資訊卡 -->
             <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
               <div class="flex items-center space-x-3">
                 <div id="accountAvatar" class="w-11 h-11 rounded-full bg-slate-700 flex items-center justify-center text-lg font-bold text-amber-400 border border-slate-600">
@@ -253,11 +252,10 @@
               </div>
             </div>
 
-            <!-- 雲端同步控制按鈕群 -->
             <div class="grid grid-cols-2 gap-2.5">
               <button onclick="syncToCloud(true)" class="bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-300 text-xs font-semibold py-2.5 px-3 rounded-xl transition flex items-center justify-center space-x-1.5">
                 <span>⬆️</span>
-                <span>立即上傳設定至雲端</span>
+                <span>開啟 / 備份雲端設定</span>
               </button>
               <button onclick="syncFromCloud(true)" class="bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-semibold py-2.5 px-3 rounded-xl transition flex items-center justify-center space-x-1.5">
                 <span>⬇️</span>
@@ -265,24 +263,18 @@
               </button>
             </div>
 
-            <!-- Firebase Google Cloud 專案設定摺疊區 + 跨裝置同步碼備援 -->
             <details class="bg-slate-900/60 border border-slate-700/70 rounded-xl p-3 text-xs">
               <summary class="cursor-pointer font-semibold text-slate-300 hover:text-white flex items-center justify-between">
-                <span>⚙️ 進階：連結您專屬的 Firebase (Google Cloud) 或使用跨裝置同步碼</span>
+                <span>⚙️ 進階：跨裝置同步碼備援</span>
                 <span class="text-slate-500">展開設定 ▾</span>
               </summary>
               <div class="mt-3 space-y-3 pt-3 border-t border-slate-800 text-slate-400">
                 <div>
-                  <label class="block text-slate-300 font-medium mb-1">方式 1：貼上 Firebase Web Config JSON（啟用真實 Google OAuth 彈窗與 Firestore 雲端資料庫）</label>
-                  <textarea id="firebaseConfigInput" rows="3" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}' class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-[11px] font-mono text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
-                  <button onclick="saveFirebaseConfig()" class="mt-1.5 bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded text-xs transition">儲存 Firebase 設定</button>
-                </div>
-                <div class="pt-2 border-t border-slate-800">
-                  <label class="block text-slate-300 font-medium mb-1">方式 2：免後端跨裝置配置碼（複製下方字串至手機/電腦貼上即可瞬間同步所有喜好與推播設定）</label>
+                  <label class="block text-slate-300 font-medium mb-1">跨裝置同步碼（複製字串至手機或另一台電腦貼上即可瞬間同步）</label>
                   <div class="flex space-x-2">
                     <input type="text" id="portableSyncCodeInput" placeholder="點擊右側產生或貼上同步碼" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-amber-300">
-                    <button onclick="exportSyncCode()" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1.5 rounded whitespace-nowrap">複製同步碼</button>
-                    <button onclick="importSyncCode()" class="bg-amber-600 hover:bg-amber-500 text-white px-2.5 py-1.5 rounded whitespace-nowrap">匯入還原</button>
+                    <button onclick="exportSyncCode()" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1.5 rounded whitespace-nowrap">複製</button>
+                    <button onclick="importSyncCode()" class="bg-amber-600 hover:bg-amber-500 text-white px-2.5 py-1.5 rounded whitespace-nowrap">還原</button>
                   </div>
                 </div>
               </div>
@@ -290,12 +282,11 @@
           </div>
 
           <div class="pt-3 border-t border-slate-700/70 flex items-center justify-between text-xs text-slate-400">
-            <span>自動同步：修改股票、階梯或推播設定時自動寫入雲端</span>
+            <span>自動同步：修改股票或設定時自動寫入雲端</span>
             <span id="lastCloudSyncTime" class="font-mono text-slate-300">尚未雲端同步</span>
           </div>
         </div>
 
-        <!-- 右欄：iPhone Bark / LINE / Discord 觸價推播設定 -->
         <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg space-y-4 flex flex-col justify-between">
           <div class="space-y-4">
             <div class="flex items-center justify-between border-b border-slate-700 pb-3">
@@ -310,28 +301,39 @@
 
             <div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-3.5">
               <label class="block text-xs font-semibold text-emerald-400 mb-1">🥇 方案 A：iPhone Bark 推播 (最推薦、免後端)</label>
-              <p class="text-xs text-slate-400 mb-2">
-                於 App Store 下載免費的「<b>Bark</b>」App，打開後複製您的專屬伺服器網址或 Key 貼在下方，即可直接推播至 iPhone 鎖定畫面：
-              </p>
               <input type="text" id="barkKeyInput" placeholder="例如: https://api.day.app/你的專屬Key" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
             </div>
 
             <div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-3.5">
               <label class="block text-xs font-semibold text-indigo-400 mb-1">🥈 方案 B：Discord / Make (LINE) Webhook</label>
-              <p class="text-xs text-slate-400 mb-2">
-                可貼入 Discord 頻道 Webhook 網址，或透過 Make.com 轉發至 LINE Official Account 的 Webhook 網址：
-              </p>
               <input type="text" id="webhookUrlInput" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
             </div>
 
-            <div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-3.5 flex items-center justify-between">
-              <div>
-                <div class="text-xs font-semibold text-slate-200">🎯 自動推播觸發門檻 (%)</div>
-                <div class="text-[11px] text-slate-400">當月線或季線乖離率絕對值 ≥ 此數值時發送推播</div>
+            <!-- 自動推播觸發門檻條件 (修復符號與支援多選/多數字) -->
+            <div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-3.5 space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-semibold text-slate-200">🎯 自動推播觸發門檻條件</div>
+                  <div class="text-[11px] text-slate-400">可勾選條件並輸入多個數值（逗號分隔，例: 5, 10, 20）</div>
+                </div>
               </div>
-              <div class="flex items-center space-x-1.5">
-                <input type="number" id="alertMinBiasInput" value="5" min="1" max="100" class="w-16 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-center text-amber-300 focus:outline-none focus:border-blue-500">
-                <span class="text-xs text-slate-400">%</span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <!-- 大於等於條件 -->
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 space-y-1.5">
+                  <label class="flex items-center space-x-2 text-rose-400 font-semibold cursor-pointer">
+                    <input type="checkbox" id="alertCondGte" checked class="rounded bg-slate-900 border-slate-700 text-rose-500 focus:ring-0">
+                    <span>大於等於 (≥ 正/負乖離絕對值)</span>
+                  </label>
+                  <input type="text" id="alertGteValuesInput" value="5, 10" placeholder="例: 5, 10, 20" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-amber-300 font-mono focus:outline-none">
+                </div>
+                <!-- 小於等於條件 -->
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 space-y-1.5">
+                  <label class="flex items-center space-x-2 text-emerald-400 font-semibold cursor-pointer">
+                    <input type="checkbox" id="alertCondLte" class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0">
+                    <span>小於等於 (≤ 正/負乖離絕對值)</span>
+                  </label>
+                  <input type="text" id="alertLteValuesInput" value="" placeholder="例: -5, -10" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-amber-300 font-mono focus:outline-none">
+                </div>
               </div>
             </div>
           </div>
@@ -345,29 +347,17 @@
             </button>
           </div>
         </div>
-
       </div>
     </section>
   </main>
 
-  <!-- 快速登入 Google 帳號彈窗 (當未配置外部 Firebase 時提供一鍵 Google 帳號綁定體驗) -->
+  <!-- 快速登入 Google 帳號彈窗 -->
   <div id="googleQuickModal" class="hidden fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <div class="flex items-center space-x-2">
-          <svg class="w-5 h-5" viewBox="0 0 24 24">
-            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
-            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.5H12v4.8h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
-            <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
-            <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 20.9 7.4 24 12 24z"/>
-          </svg>
-          <h3 class="text-base font-bold text-white">登入 Google 帳號以同步雲端設定</h3>
-        </div>
+        <h3 class="text-base font-bold text-white">一鍵登入 Google 帳號</h3>
         <button onclick="closeGoogleQuickModal()" class="text-slate-400 hover:text-white">✕</button>
       </div>
-      <p class="text-xs text-slate-300 leading-relaxed">
-        請輸入您的 Google 信箱與顯示名稱。系統會以此帳號為您建立專屬雲端設定檔（包含自選股票清單、乖離率階梯與 iPhone 推播金鑰）：
-      </p>
       <form onsubmit="confirmQuickGoogleLogin(event)" class="space-y-3">
         <div>
           <label class="block text-xs text-slate-400 mb-1">Google 電子郵件 (Gmail)*</label>
@@ -386,7 +376,6 @@
   </div>
 
   <script>
-    // 預設股票清單 (內建近期基準參考價，確保初次打開 0 秒立即可看，隨後背景極速更新)
     const DEFAULT_STOCKS = [
       { symbol: '00631L.TW', displayCode: '00631L', name: '元大台灣50正2', price: null, ma20: null, ma60: null, updatedAt: '尚未抓取' },
       { symbol: '00685L.TW', displayCode: '00685L', name: '群益臺灣加權正2', price: null, ma20: null, ma60: null, updatedAt: '尚未抓取' },
@@ -401,19 +390,17 @@
     const STORAGE_KEY_NOTIFY = 'xin_stock_tracker_v3_notify';
     const STORAGE_KEY_HISTORY_CACHE = 'xin_stock_tracker_v3_kline_cache';
     const STORAGE_KEY_USER = 'xin_stock_tracker_v3_google_user';
-    const STORAGE_KEY_FIREBASE = 'xin_stock_tracker_v3_firebase_cfg';
 
     let stocks = [];
     let thresholds = [5, 10, 15, 20, 25];
-    let notifyConfig = { barkKey: '', webhookUrl: '', minBias: 5 };
-    let currentUser = null; // { email, name, uid, lastSync }
+    let notifyConfig = { barkKey: '', webhookUrl: '', condGte: true, gteValues: '5, 10', condLte: false, lteValues: '' };
+    let currentUser = null;
 
-    // 走勢圖狀態管理
-    let currentTab = 'chart';        // 'chart' | 'ladder' | 'account'
+    let currentTab = 'chart';        
     let selectedStockIndex = 0;
-    let currentMaMode = '20MA';      // '20MA' | '60MA' | 'BOTH'
+    let currentMaMode = '20MA';      
     let chartDaysLimit = 120;
-    let historyCache = {};           // 本地持久化快取 K 線，打開網頁秒出圖
+    let historyCache = {};           
     let priceChartInstance = null;
     let biasChartInstance = null;
 
@@ -437,18 +424,18 @@
       return symbol.replace(/\.(TW|TWO)$/i, '');
     }
 
-    // ==========================================
-    // 導覽分頁切換 (股價走勢與均線 / 乖離率階梯與清單 / 帳號與推播設定)
-    // ==========================================
+    // 分頁切換
     function switchMainTab(tabName) {
       currentTab = tabName;
       const sections = {
         chart: document.getElementById('tabContentChart'),
+        editor: document.getElementById('tabContentEditor'),
         ladder: document.getElementById('tabContentLadder'),
         account: document.getElementById('tabContentAccount')
       };
       const buttons = {
         chart: document.getElementById('tabBtnChart'),
+        editor: document.getElementById('tabBtnEditor'),
         ladder: document.getElementById('tabBtnLadder'),
         account: document.getElementById('tabBtnAccount')
       };
@@ -467,6 +454,7 @@
       });
 
       if (tabName === 'chart') renderChartTab();
+      if (tabName === 'editor') renderEditorList();
       if (tabName === 'ladder') renderStockList();
       if (tabName === 'account') renderAccountTab();
     }
@@ -477,17 +465,12 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ==========================================
-    // 初始化載入與快取秒開機制
-    // ==========================================
     function initApp() {
-      // 載入快取的歷史 K 線 (讓圖表 0 秒呈現)
       const savedCache = localStorage.getItem(STORAGE_KEY_HISTORY_CACHE);
       if (savedCache) {
         try { historyCache = JSON.parse(savedCache); } catch (e) { historyCache = {}; }
       }
 
-      // 載入股票清單 (向下相容 v2 資料)
       const savedStocks = localStorage.getItem(STORAGE_KEY_STOCKS) || localStorage.getItem('xin_stock_tracker_v2_list');
       if (savedStocks) {
         try { stocks = JSON.parse(savedStocks); } catch (e) { stocks = JSON.parse(JSON.stringify(DEFAULT_STOCKS)); }
@@ -496,7 +479,6 @@
         saveStocksToStorage();
       }
 
-      // 載入乖離階梯
       const savedThresholds = localStorage.getItem(STORAGE_KEY_THRESHOLDS) || localStorage.getItem('xin_stock_tracker_v2_thresholds');
       if (savedThresholds) {
         try {
@@ -505,34 +487,29 @@
         } catch (e) {}
       }
 
-      // 載入推播設定
       const savedNotify = localStorage.getItem(STORAGE_KEY_NOTIFY) || localStorage.getItem('xin_stock_tracker_v2_notify');
       if (savedNotify) {
         try {
           notifyConfig = JSON.parse(savedNotify);
           document.getElementById('barkKeyInput').value = notifyConfig.barkKey || '';
           document.getElementById('webhookUrlInput').value = notifyConfig.webhookUrl || '';
-          document.getElementById('alertMinBiasInput').value = notifyConfig.minBias || 5;
+          document.getElementById('alertCondGte').checked = notifyConfig.condGte ?? true;
+          document.getElementById('alertGteValuesInput').value = notifyConfig.gteValues || '5, 10';
+          document.getElementById('alertCondLte').checked = notifyConfig.condLte ?? false;
+          document.getElementById('alertLteValuesInput').value = notifyConfig.lteValues || '';
         } catch (e) {}
       }
 
-      // 載入 Google 帳號登入狀態
       const savedUser = localStorage.getItem(STORAGE_KEY_USER);
       if (savedUser) {
         try { currentUser = JSON.parse(savedUser); } catch (e) { currentUser = null; }
       }
 
-      const savedFbCfg = localStorage.getItem(STORAGE_KEY_FIREBASE);
-      if (savedFbCfg) {
-        document.getElementById('firebaseConfigInput').value = savedFbCfg;
-      }
-
       updateHeaderUserUI();
       renderStockList();
+      renderEditorList();
       renderChartTab();
       renderAccountTab();
-
-      // 啟動極速併發更新
       fetchAllQuotes();
     }
 
@@ -542,9 +519,7 @@
     }
 
     function saveHistoryCacheToStorage() {
-      try {
-        localStorage.setItem(STORAGE_KEY_HISTORY_CACHE, JSON.stringify(historyCache));
-      } catch (e) {}
+      try { localStorage.setItem(STORAGE_KEY_HISTORY_CACHE, JSON.stringify(historyCache)); } catch (e) {}
     }
 
     function showStatus(msg, isError = false) {
@@ -560,10 +535,6 @@
       return ((price - ma) / ma) * 100;
     }
 
-    // ==========================================
-    // ⚡ 極速多通道併發報價引擎 (解決之前同步過慢與 0/6 失敗問題)
-    // ==========================================
-    // 支援超時自動切斷的 fetch
     async function fetchWithTimeout(url, timeoutMs = 4500) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -578,57 +549,44 @@
       }
     }
 
-    // 通道 A：FinMind 台股官方開源 API (瀏覽器直連免 Proxy，速度最快約 0.3~0.8 秒)
     async function fetchFromFinMind(symbol) {
       const stockId = getDisplayCode(symbol);
-      // 若非台股代號則跳過此通道
       if (!/^\d{4,6}[A-Z]?$/.test(stockId)) throw new Error('Not TW stock');
-
       const d = new Date();
-      d.setMonth(d.getMonth() - 7); // 抓取近 7 個月確保有足夠 60MA 與半年圖表
+      d.setMonth(d.getMonth() - 7);
       const startDate = d.toISOString().slice(0, 10);
       const url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${encodeURIComponent(stockId)}&start_date=${startDate}`;
 
       const json = await fetchWithTimeout(url, 4000);
-      if (!json || !Array.isArray(json.data) || json.data.length < 5) {
-        throw new Error('FinMind 無資料');
-      }
+      if (!json || !Array.isArray(json.data) || json.data.length < 5) throw new Error('FinMind 無資料');
 
       const dates = [];
       const closes = [];
       json.data.forEach(row => {
         if (row.close && row.close > 0) {
-          // row.date 格式 YYYY-MM-DD -> 取 MM/DD
           dates.push(row.date.slice(5).replace('-', '/'));
           closes.push(Number(Number(row.close).toFixed(2)));
         }
       });
-
       if (!closes.length) throw new Error('FinMind 無有效收盤價');
       return buildMaResult(symbol, dates, closes, closes[closes.length - 1], 'FinMind 台股直連');
     }
 
-    // 通道 B/C/D：Yahoo Finance 多代理同時競速 (Promise.any 取最快回應者)
     async function fetchFromYahooFastRace(symbol) {
       const yahooPaths = [
         `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=6mo&interval=1d`,
         `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=6mo&interval=1d`
       ];
-
       const raceUrls = [
         `https://corsproxy.io/?${encodeURIComponent(yahooPaths[0])}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooPaths[1])}`,
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooPaths[0])}`
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooPaths[1])}`
       ];
-
-      // 同時發起競速，只要其中一個在 4.5 秒內最先成功就立即採用
       const data = await Promise.any(raceUrls.map(u => fetchWithTimeout(u, 4500)));
       const result = data?.chart?.result?.[0];
       if (!result) throw new Error('Yahoo 格式無效');
 
       const rawTimestamps = result.timestamp || [];
       const rawCloses = result.indicators?.quote?.[0]?.close || [];
-
       const dates = [];
       const closes = [];
       for (let i = 0; i < rawCloses.length; i++) {
@@ -640,20 +598,17 @@
           closes.push(Number(rawCloses[i].toFixed(2)));
         }
       }
-
       if (!closes.length) throw new Error('查無收盤價');
       const currentPrice = result.meta?.regularMarketPrice || closes[closes.length - 1];
       return buildMaResult(symbol, dates, closes, currentPrice, 'Yahoo 極速通道');
     }
 
-    // 統一計算 20MA / 60MA 歷史序列並寫入快取
     function buildMaResult(symbol, dates, closes, currentPrice, sourceName) {
       const ma20Series = closes.map((_, idx) => {
         const start = Math.max(0, idx - 19);
         const sub = closes.slice(start, idx + 1);
         return Number((sub.reduce((a, b) => a + b, 0) / sub.length).toFixed(2));
       });
-
       const ma60Series = closes.map((_, idx) => {
         const start = Math.max(0, idx - 59);
         const sub = closes.slice(start, idx + 1);
@@ -661,7 +616,6 @@
       });
 
       historyCache[symbol] = { dates, closes, ma20Series, ma60Series, sourceName };
-
       return {
         price: Number(Number(currentPrice).toFixed(2)),
         ma20: ma20Series[ma20Series.length - 1],
@@ -670,20 +624,14 @@
       };
     }
 
-    // 結合 FinMind 直連與 Yahoo 競速的雙引擎抓取函式
     async function fetchFastStockData(symbol) {
       try {
-        // 同時讓 FinMind 直連與 Yahoo 多代理競速賽跑，誰先回來就用誰！
-        return await Promise.any([
-          fetchFromFinMind(symbol),
-          fetchFromYahooFastRace(symbol)
-        ]);
+        return await Promise.any([fetchFromFinMind(symbol), fetchFromYahooFastRace(symbol)]);
       } catch (err) {
         throw new Error('所有高速通道皆無回應');
       }
     }
 
-    // 更新單一股票
     async function fetchSingleStock(idx, showMsg = true) {
       const st = stocks[idx];
       if (!st) return false;
@@ -697,17 +645,16 @@
         saveStocksToStorage();
         saveHistoryCacheToStorage();
         renderStockList();
+        renderEditorList();
         if (idx === selectedStockIndex) renderChartTab();
-        if (showMsg) showStatus(`✅ ${st.displayCode} ${st.name} 極速更新完成 (${quote.sourceName} ‧ ${st.updatedAt})`);
-        checkAndSendAlerts([st]);
+        if (showMsg) showStatus(`✅ ${st.displayCode} ${st.name} 極速更新完成 (${quote.sourceName})`);
         return true;
       } catch (err) {
-        if (showMsg) showStatus(`⚠️ 無法自動抓取 ${st.displayCode}，您可於「乖離率階梯與清單」分頁手動編輯價格。`, true);
+        if (showMsg) showStatus(`⚠️ 無法自動抓取 ${st.displayCode}，您可於「編輯股票清單」分頁手動輸入價格。`, true);
         return false;
       }
     }
 
-    // ⚡ 全部股票同時併發極速更新 (Promise.all，6 檔同時抓僅需 1~2 秒)
     async function fetchAllQuotes() {
       const btn = document.getElementById('btnFetchAll');
       const icon = document.getElementById('fetchIcon');
@@ -716,9 +663,9 @@
       icon.classList.add('animate-spin');
       btnText.textContent = '極速同步中...';
       const startTime = performance.now();
-      showStatus('⚡ 正在透過多通道併發引擎同時同步全部股票...');
+      showStatus('⚡ 正在透過多通道併發引擎同步全部股票...');
 
-      const tasks = stocks.map(async (st, idx) => {
+      const tasks = stocks.map(async (st) => {
         try {
           const quote = await fetchFastStockData(st.symbol);
           st.price = quote.price;
@@ -727,7 +674,6 @@
           st.updatedAt = formatDateTime(new Date());
           return st;
         } catch (e) {
-          console.warn(`Fast fetch failed for ${st.symbol}:`, e);
           return null;
         }
       });
@@ -739,36 +685,20 @@
       saveStocksToStorage();
       saveHistoryCacheToStorage();
       renderStockList();
+      renderEditorList();
       renderChartTab();
 
       btn.disabled = false;
       icon.classList.remove('animate-spin');
       btnText.textContent = '極速更新報價';
-
-      const nowStr = formatDateTime(new Date());
-      if (updatedStocks.length === stocks.length) {
-        showStatus(`⚡ 全部 ${updatedStocks.length} 檔股票同步完成！耗時僅 ${elapsedSec} 秒 (${nowStr})`);
-      } else if (updatedStocks.length > 0) {
-        showStatus(`⚡ 已完成 ${updatedStocks.length}/${stocks.length} 檔同步 (耗時 ${elapsedSec} 秒 ‧ ${nowStr})`);
-      } else {
-        showStatus(`⚠️ 目前網路代理忙碌，建議點擊單檔「🔄 刷新此檔」或手動輸入基準價。`, true);
-      }
-
-      if (updatedStocks.length > 0) {
-        checkAndSendAlerts(updatedStocks);
-      }
+      showStatus(`⚡ 全部 ${updatedStocks.length}/${stocks.length} 檔股票同步完成！耗時 ${elapsedSec} 秒`);
     }
 
-    // ==========================================
-    // 【股價走勢與均線】分頁渲染邏輯
-    // ==========================================
     function selectChartStock(idx) {
       selectedStockIndex = idx;
       renderChartTab();
       const st = stocks[idx];
-      if (st && !historyCache[st.symbol]) {
-        fetchSingleStock(idx, true);
-      }
+      if (st && !historyCache[st.symbol]) fetchSingleStock(idx, true);
     }
 
     function switchMaMode(mode) {
@@ -776,12 +706,10 @@
       const btn20 = document.getElementById('maModeBtn20');
       const btn60 = document.getElementById('maModeBtn60');
       const btnBoth = document.getElementById('maModeBtnBoth');
-
       const inactiveClass = 'flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white';
       btn20.className = mode === '20MA' ? 'flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition bg-sky-600 text-white shadow' : inactiveClass;
       btn60.className = mode === '60MA' ? 'flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition bg-amber-600 text-white shadow' : inactiveClass;
       btnBoth.className = mode === 'BOTH' ? 'flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow' : inactiveClass;
-
       renderChartTab();
     }
 
@@ -807,7 +735,7 @@
       const sourceBadge = document.getElementById('chartDataSourceBadge');
 
       if (!stocks.length) {
-        selectorEl.innerHTML = `<span class="text-xs text-slate-400">尚無股票，請至「乖離率階梯與清單」分頁新增股票</span>`;
+        selectorEl.innerHTML = `<span class="text-xs text-slate-400">尚無股票，請至「編輯股票清單」分頁新增</span>`;
         summaryEl.innerHTML = '';
         titleEl.textContent = '尚無股票資料';
         return;
@@ -818,18 +746,14 @@
       const codeShown = st.displayCode || getDisplayCode(st.symbol);
       const cached = historyCache[st.symbol];
 
-      if (cached && cached.sourceName) {
-        sourceBadge.textContent = `⚡ 來源：${cached.sourceName}`;
-      }
+      if (cached && cached.sourceName) sourceBadge.textContent = `⚡ 來源：${cached.sourceName}`;
 
       selectorEl.innerHTML = stocks.map((item, idx) => {
         const isSelected = idx === selectedStockIndex;
         const c = item.displayCode || getDisplayCode(item.symbol);
         return `
           <button onclick="selectChartStock(${idx})" class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center space-x-1.5 border ${
-            isSelected
-              ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow'
-              : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500'
+            isSelected ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow' : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500'
           }">
             <span class="font-mono">${c}</span>
             <span>${item.name || ''}</span>
@@ -849,14 +773,14 @@
           <div class="text-xs text-slate-400 mb-1">目前現價 (${codeShown})</div>
           <div class="text-2xl font-mono font-extrabold text-white">${st.price ? Number(st.price).toFixed(2) : '--'}</div>
         </div>
-        <div onclick="switchMaMode('20MA')" class="cursor-pointer bg-slate-800 border ${currentMaMode !== '60MA' ? 'border-sky-500/80 ring-1 ring-sky-500/30' : 'border-slate-700'} rounded-xl p-3.5 shadow transition hover:border-sky-400">
+        <div onclick="switchMaMode('20MA')" class="cursor-pointer bg-slate-800 border ${currentMaMode !== '60MA' ? 'border-sky-500/80 ring-1 ring-sky-500/30' : 'border-slate-700'} rounded-xl p-3.5 shadow transition">
           <div class="text-xs text-sky-400 font-semibold mb-1">🌙 月線 (20MA) 與乖離</div>
           <div class="flex items-baseline justify-between">
             <span class="text-lg font-mono font-bold text-white">${st.ma20 ? Number(st.ma20).toFixed(2) : '--'}</span>
             <span class="text-xs font-mono font-bold ${bias20 > 0 ? 'text-rose-400' : 'text-emerald-400'}">${bias20 !== null ? (bias20 > 0 ? '+' : '') + bias20.toFixed(2) + '%' : '--'}</span>
           </div>
         </div>
-        <div onclick="switchMaMode('60MA')" class="cursor-pointer bg-slate-800 border ${currentMaMode === '60MA' ? 'border-amber-500/80 ring-1 ring-amber-500/30' : 'border-slate-700'} rounded-xl p-3.5 shadow transition hover:border-amber-400">
+        <div onclick="switchMaMode('60MA')" class="cursor-pointer bg-slate-800 border ${currentMaMode === '60MA' ? 'border-amber-500/80 ring-1 ring-amber-500/30' : 'border-slate-700'} rounded-xl p-3.5 shadow transition">
           <div class="text-xs text-amber-400 font-semibold mb-1">🍂 季線 (60MA) 與乖離</div>
           <div class="flex items-baseline justify-between">
             <span class="text-lg font-mono font-bold text-white">${st.ma60 ? Number(st.ma60).toFixed(2) : '--'}</span>
@@ -869,19 +793,13 @@
             ${activeMaVal ? `
               <div class="flex justify-between text-rose-400"><span>+5% / +10%:</span><span>${(activeMaVal * 1.05).toFixed(1)} / ${(activeMaVal * 1.10).toFixed(1)}</span></div>
               <div class="flex justify-between text-emerald-400"><span>-5% / -10%:</span><span>${(activeMaVal * 0.95).toFixed(1)} / ${(activeMaVal * 0.90).toFixed(1)}</span></div>
-            ` : '<span class="text-slate-500">極速抓取均線中...</span>'}
+            ` : '<span class="text-slate-500">計算中...</span>'}
           </div>
         </div>
       `;
 
-      const modeTitleMap = {
-        '20MA': '收盤價 vs 月線 (20MA)',
-        '60MA': '收盤價 vs 季線 (60MA)',
-        'BOTH': '收盤價 vs 月線 (20MA) + 季線 (60MA)'
-      };
-      titleEl.textContent = `${codeShown} ${st.name || ''} — ${modeTitleMap[currentMaMode]}`;
+      titleEl.textContent = `${codeShown} ${st.name || ''} — 走勢與均線`;
       document.getElementById('biasChartTitle').textContent = `📊 ${currentMaMode === '60MA' ? '季線 (60MA)' : '月線 (20MA)'} 歷史乖離率波動 (%)`;
-
       drawStockCharts(st);
     }
 
@@ -893,14 +811,7 @@
       if (priceChartInstance) priceChartInstance.destroy();
       if (biasChartInstance) biasChartInstance.destroy();
 
-      if (!hist || !hist.dates || hist.dates.length === 0) {
-        priceChartInstance = new Chart(ctxPrice, {
-          type: 'line',
-          data: { labels: ['正在透過高速通道載入歷史 K 線...'], datasets: [{ label: '現價', data: [st.price || 0] }] },
-          options: { responsive: true, maintainAspectRatio: false }
-        });
-        return;
-      }
+      if (!hist || !hist.dates || hist.dates.length === 0) return;
 
       const sliceCount = Math.min(chartDaysLimit, hist.dates.length);
       const labels = hist.dates.slice(-sliceCount);
@@ -908,43 +819,22 @@
       const ma20s = hist.ma20Series.slice(-sliceCount);
       const ma60s = hist.ma60Series.slice(-sliceCount);
 
-      const datasets = [
-        {
-          label: '收盤價',
-          data: closes,
-          borderColor: '#f8fafc',
-          backgroundColor: 'rgba(248, 250, 252, 0.08)',
-          borderWidth: 2,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          tension: 0.15,
-          fill: true
-        }
-      ];
+      const datasets = [{
+        label: '收盤價',
+        data: closes,
+        borderColor: '#f8fafc',
+        backgroundColor: 'rgba(248, 250, 252, 0.08)',
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0.15,
+        fill: true
+      }];
 
       if (currentMaMode === '20MA' || currentMaMode === 'BOTH') {
-        datasets.push({
-          label: '月線 (20MA)',
-          data: ma20s,
-          borderColor: '#38bdf8',
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: 0.2,
-          fill: false
-        });
+        datasets.push({ label: '月線 (20MA)', data: ma20s, borderColor: '#38bdf8', borderWidth: 2, pointRadius: 0, tension: 0.2, fill: false });
       }
-
       if (currentMaMode === '60MA' || currentMaMode === 'BOTH') {
-        datasets.push({
-          label: '季線 (60MA)',
-          data: ma60s,
-          borderColor: '#fbbf24',
-          borderWidth: 2,
-          borderDash: currentMaMode === 'BOTH' ? [5, 4] : [],
-          pointRadius: 0,
-          tension: 0.2,
-          fill: false
-        });
+        datasets.push({ label: '季線 (60MA)', data: ma60s, borderColor: '#fbbf24', borderWidth: 2, borderDash: [5, 4], pointRadius: 0, tension: 0.2, fill: false });
       }
 
       priceChartInstance = new Chart(ctxPrice, {
@@ -954,25 +844,10 @@
           responsive: true,
           maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { labels: { color: '#cbd5e1', font: { size: 12 } } },
-            tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              titleColor: '#f8fafc',
-              bodyColor: '#e2e8f0',
-              borderColor: '#334155',
-              borderWidth: 1
-            }
-          },
+          plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 12 } } } },
           scales: {
-            x: {
-              ticks: { color: '#94a3b8', maxTicksLimit: 8, font: { size: 11 } },
-              grid: { color: 'rgba(51, 65, 85, 0.35)' }
-            },
-            y: {
-              ticks: { color: '#94a3b8', font: { size: 11 } },
-              grid: { color: 'rgba(51, 65, 85, 0.35)' }
-            }
+            x: { ticks: { color: '#94a3b8', maxTicksLimit: 8 }, grid: { color: 'rgba(51, 65, 85, 0.35)' } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(51, 65, 85, 0.35)' } }
           }
         }
       });
@@ -980,172 +855,48 @@
       const targetMaSeries = currentMaMode === '60MA' ? ma60s : ma20s;
       const biasSeries = closes.map((c, i) => {
         const m = targetMaSeries[i];
-        if (!c || !m) return 0;
-        return Number((((c - m) / m) * 100).toFixed(2));
+        return (!c || !m) ? 0 : Number((((c - m) / m) * 100).toFixed(2));
       });
       const barColors = biasSeries.map(val => val >= 0 ? 'rgba(244, 63, 94, 0.75)' : 'rgba(16, 185, 129, 0.75)');
 
       biasChartInstance = new Chart(ctxBias, {
         type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label: `${currentMaMode === '60MA' ? '季線' : '月線'}乖離率 (%)`,
-            data: biasSeries,
-            backgroundColor: barColors,
-            borderRadius: 2
-          }]
-        },
+        data: { labels, datasets: [{ data: biasSeries, backgroundColor: barColors, borderRadius: 2 }] },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              callbacks: {
-                label: (ctx) => `乖離率: ${ctx.raw > 0 ? '+' : ''}${ctx.raw}%`
-              }
-            }
-          },
+          plugins: { legend: { display: false } },
           scales: {
             x: { display: false },
-            y: {
-              ticks: {
-                color: '#94a3b8',
-                font: { size: 10 },
-                callback: (v) => `${v > 0 ? '+' : ''}${v}%`
-              },
-              grid: { color: 'rgba(51, 65, 85, 0.35)' }
-            }
+            y: { ticks: { color: '#94a3b8', callback: (v) => `${v > 0 ? '+' : ''}${v}%` }, grid: { color: 'rgba(51, 65, 85, 0.35)' } }
           }
         }
       });
     }
 
-    // ==========================================
-    // 【乖離率階梯與清單】分頁邏輯
-    // ==========================================
-    function getHitBadgeHtml(bias, maLabel) {
-      if (bias === null) return '';
-      const absBias = Math.abs(bias);
-      const sortedDesc = [...thresholds].sort((a, b) => b - a);
-      const hitLevel = sortedDesc.find(t => absBias >= t);
-      if (!hitLevel) {
-        return `<span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300">${maLabel} 區間內 (${bias > 0 ? '+' : ''}${bias.toFixed(2)}%)</span>`;
-      }
-      if (bias > 0) {
-        return `<span class="badge-pulse text-xs font-bold px-2.5 py-0.5 rounded bg-rose-500/20 border border-rose-500 text-rose-300">🔥 突破 ${maLabel} +${hitLevel}% (${bias > 0 ? '+' : ''}${bias.toFixed(2)}%)</span>`;
-      } else {
-        return `<span class="badge-pulse text-xs font-bold px-2.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-500 text-emerald-300">❄️ 跌破 ${maLabel} -${hitLevel}% (${bias.toFixed(2)}%)</span>`;
-      }
-    }
-
-    function renderLadderTable(price, ma, maTitle) {
-      if (!ma || ma <= 0) {
-        return `<div class="text-xs text-slate-500 italic py-3 text-center">尚無 ${maTitle} 資料，請點擊極速更新或手動輸入</div>`;
-      }
-      const bias = calcBias(price, ma);
-      const biasColor = bias > 0 ? 'text-rose-400' : (bias < 0 ? 'text-emerald-400' : 'text-slate-200');
-      const biasStr = bias !== null ? `${bias > 0 ? '+' : ''}${bias.toFixed(2)}%` : '--';
-
-      let cellsHtml = '';
-      thresholds.forEach(pct => {
-        const upperPrice = ma * (1 + pct / 100);
-        const lowerPrice = ma * (1 - pct / 100);
-        const hitUpper = price && price >= upperPrice;
-        const hitLower = price && price <= lowerPrice;
-
-        cellsHtml += `
-          <div class="bg-slate-900/90 border ${hitUpper || hitLower ? 'border-amber-400/80' : 'border-slate-700/70'} rounded-lg p-2 text-center">
-            <div class="text-[11px] font-semibold text-slate-400 border-b border-slate-800 pb-1 mb-1">±${pct}% 階梯</div>
-            <div class="flex flex-col space-y-1 text-xs">
-              <div class="flex justify-between items-center ${hitUpper ? 'bg-rose-500/20 text-rose-300 font-bold px-1 rounded' : 'text-rose-400/90'}">
-                <span>+${pct}%</span>
-                <span>${upperPrice.toFixed(2)}</span>
-              </div>
-              <div class="flex justify-between items-center ${hitLower ? 'bg-emerald-500/20 text-emerald-300 font-bold px-1 rounded' : 'text-emerald-400/90'}">
-                <span>-${pct}%</span>
-                <span>${lowerPrice.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-
-      return `
-        <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-3">
-          <div class="flex flex-wrap justify-between items-center mb-2.5 gap-2">
-            <div class="flex items-center space-x-2">
-              <span class="text-xs font-bold text-slate-200">${maTitle}</span>
-              <span class="text-sm font-mono font-semibold text-amber-300">${Number(ma).toFixed(2)}</span>
-            </div>
-            <div class="text-xs">
-              目前乖離：<span class="font-mono font-bold ${biasColor}">${biasStr}</span>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            ${cellsHtml}
-          </div>
-        </div>
-      `;
-    }
-
-    function renderStockList() {
-      const container = document.getElementById('stockList');
+    // 編輯股票清單邏輯
+    function renderEditorList() {
+      const container = document.getElementById('editorStockTableList');
       if (!stocks.length) {
-        container.innerHTML = `<div class="bg-slate-800 border border-slate-700 rounded-xl p-8 text-center text-slate-400 text-sm">目前沒有追蹤的股票，請從上方表單新增，或點擊「重置預設清單」。</div>`;
+        container.innerHTML = `<div class="text-xs text-slate-400 text-center py-4">尚無股票清單</div>`;
         return;
       }
 
-      container.innerHTML = stocks.map((st, idx) => {
-        const bias20 = calcBias(st.price, st.ma20);
-        const bias60 = calcBias(st.price, st.ma60);
-        const codeShown = st.displayCode || getDisplayCode(st.symbol);
-
-        return `
-          <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-lg transition hover:border-slate-600">
-            <div class="flex flex-wrap justify-between items-start gap-3 pb-3 mb-3 border-b border-slate-700/80">
-              <div class="flex flex-wrap items-baseline gap-2.5">
-                <span class="text-lg font-extrabold text-white tracking-tight font-mono bg-slate-900 px-2.5 py-0.5 rounded border border-slate-700">${codeShown}</span>
-                <h3 class="text-base font-bold text-amber-400">${st.name || ''}</h3>
-                <div class="flex items-baseline space-x-1 ml-1">
-                  <span class="text-xs text-slate-400">現價</span>
-                  <span class="text-xl font-mono font-extrabold text-white">${st.price ? Number(st.price).toFixed(2) : '--'}</span>
-                </div>
-                <div class="flex flex-wrap gap-1.5 ml-1">
-                  ${getHitBadgeHtml(bias20, '月線')}
-                  ${getHitBadgeHtml(bias60, '季線')}
-                </div>
-              </div>
-
-              <div class="flex flex-wrap items-center gap-2 text-xs">
-                <span class="text-slate-400 font-mono bg-slate-900/70 px-2.5 py-1 rounded border border-slate-700/60">
-                  🕒 更新：${st.updatedAt || '尚未抓取'}
-                </span>
-                <button onclick="viewStockInChartTab(${idx})" class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 font-semibold px-2.5 py-1 rounded transition">
-                  📊 看走勢圖
-                </button>
-                <button onclick="fetchSingleStock(${idx}, true)" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1 rounded transition">
-                  ⚡ 抓取
-                </button>
-                <button onclick="startEditStock(${idx})" class="bg-slate-700 hover:bg-slate-600 text-blue-300 px-2.5 py-1 rounded transition">
-                  ✏️ 編輯
-                </button>
-                <button onclick="deleteStock(${idx})" class="bg-slate-700 hover:bg-rose-600/80 text-rose-300 hover:text-white px-2.5 py-1 rounded transition">
-                  🗑️
-                </button>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              ${renderLadderTable(st.price, st.ma20, '🌙 月線 (20MA)')}
-              ${renderLadderTable(st.price, st.ma60, '🍂 季線 (60MA)')}
+      container.innerHTML = stocks.map((st, idx) => `
+        <div class="bg-slate-900 border border-slate-700/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center space-x-3">
+            <span class="font-mono text-base font-extrabold text-amber-400 bg-slate-800 px-2.5 py-1 rounded border border-slate-700">${st.displayCode || getDisplayCode(st.symbol)}</span>
+            <div>
+              <div class="text-sm font-bold text-white">${st.name || ''}</div>
+              <div class="text-xs text-slate-400 font-mono">現價: ${st.price ?? '--'} | 月線: ${st.ma20 ?? '--'} | 季線: ${st.ma60 ?? '--'}</div>
             </div>
           </div>
-        `;
-      }).join('');
+          <div class="flex items-center space-x-2 text-xs">
+            <button onclick="startEditStock(${idx})" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-blue-300 px-3 py-1.5 rounded-lg transition">✏️ 編輯</button>
+            <button onclick="deleteStock(${idx})" class="bg-slate-800 hover:bg-rose-900/60 border border-slate-600 text-rose-300 px-3 py-1.5 rounded-lg transition">🗑️ 刪除</button>
+          </div>
+        </div>
+      `).join('');
     }
 
     function handleSaveStock(e) {
@@ -1171,24 +922,24 @@
 
       if (editIdx >= 0 && editIdx < stocks.length) {
         stocks[editIdx] = record;
-        showStatus(`已更新 ${displayCode} (${record.name}) 資料 (${record.updatedAt})`);
+        showStatus(`已更新 ${displayCode} (${record.name}) 資料`);
       } else {
         stocks.unshift(record);
         selectedStockIndex = 0;
-        showStatus(`已新增 ${displayCode} (${record.name})，正在極速抓取走勢與均線...`);
+        showStatus(`已新增 ${displayCode} (${record.name})，正在極速抓取走勢...`);
       }
 
       saveStocksToStorage();
       resetForm();
       renderStockList();
+      renderEditorList();
       renderChartTab();
 
-      if (editIdx === -1 && record.price === null) {
-        fetchSingleStock(0, true);
-      }
+      if (editIdx === -1 && record.price === null) fetchSingleStock(0, true);
     }
 
     function startEditStock(idx) {
+      switchMainTab('editor');
       const st = stocks[idx];
       document.getElementById('editIndex').value = idx;
       document.getElementById('symbolInput').value = st.displayCode || getDisplayCode(st.symbol);
@@ -1215,54 +966,123 @@
       if (selectedStockIndex >= stocks.length) selectedStockIndex = Math.max(0, stocks.length - 1);
       saveStocksToStorage();
       renderStockList();
+      renderEditorList();
       renderChartTab();
     }
 
     function resetToDefaults() {
-      if (!confirm('確定要恢復為預設的 6 檔股票清單（00631L、00685L、00830、2317、2363、2330）嗎？')) return;
+      if (!confirm('確定要恢復為預設的 6 檔股票清單嗎？')) return;
       stocks = JSON.parse(JSON.stringify(DEFAULT_STOCKS));
       selectedStockIndex = 0;
       saveStocksToStorage();
       renderStockList();
+      renderEditorList();
       renderChartTab();
       fetchAllQuotes();
     }
 
-    function saveThresholds() {
-      const raw = document.getElementById('thresholdsInput').value;
-      const parsed = raw.split(',')
-        .map(s => parseFloat(s.trim()))
-        .filter(n => !isNaN(n) && n > 0)
-        .sort((a, b) => a - b);
+    // 乖離率階梯檢視邏輯
+    function getHitBadgeHtml(bias, maLabel) {
+      if (bias === null) return '';
+      const absBias = Math.abs(bias);
+      const sortedDesc = [...thresholds].sort((a, b) => b - a);
+      const hitLevel = sortedDesc.find(t => absBias >= t);
+      if (!hitLevel) return `<span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300">${maLabel} 區間內</span>`;
+      if (bias > 0) return `<span class="badge-pulse text-xs font-bold px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500 text-rose-300">🔥 突破 +${hitLevel}%</span>`;
+      return `<span class="badge-pulse text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500 text-emerald-300">❄️ 跌破 -${hitLevel}%</span>`;
+    }
 
-      if (!parsed.length) {
-        alert('請輸入至少一個有效的正數百分比（如 5, 10, 15, 20）');
+    function renderLadderTable(price, ma, maTitle) {
+      if (!ma || ma <= 0) return `<div class="text-xs text-slate-500 italic py-3 text-center">尚無 ${maTitle} 資料</div>`;
+      const bias = calcBias(price, ma);
+      let cellsHtml = '';
+      thresholds.forEach(pct => {
+        const upperPrice = ma * (1 + pct / 100);
+        const lowerPrice = ma * (1 - pct / 100);
+        const hitUpper = price && price >= upperPrice;
+        const hitLower = price && price <= lowerPrice;
+        cellsHtml += `
+          <div class="bg-slate-900/90 border ${hitUpper || hitLower ? 'border-amber-400/80' : 'border-slate-700/70'} rounded-lg p-2 text-center">
+            <div class="text-[11px] font-semibold text-slate-400 border-b border-slate-800 pb-1 mb-1">±${pct}% 階梯</div>
+            <div class="flex flex-col space-y-1 text-xs">
+              <div class="flex justify-between text-rose-400"><span>+${pct}%</span><span>${upperPrice.toFixed(1)}</span></div>
+              <div class="flex justify-between text-emerald-400"><span>-${pct}%</span><span>${lowerPrice.toFixed(1)}</span></div>
+            </div>
+          </div>
+        `;
+      });
+
+      return `
+        <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-3">
+          <div class="flex justify-between items-center mb-2 text-xs">
+            <span class="font-bold text-slate-200">${maTitle}: <span class="text-amber-300 font-mono">${Number(ma).toFixed(2)}</span></span>
+            <span>乖離: <span class="font-mono font-bold ${bias > 0 ? 'text-rose-400' : 'text-emerald-400'}">${bias !== null ? (bias > 0 ? '+' : '') + bias.toFixed(2) + '%' : '--'}</span></span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">${cellsHtml}</div>
+        </div>
+      `;
+    }
+
+    function renderStockList() {
+      const container = document.getElementById('stockList');
+      if (!stocks.length) {
+        container.innerHTML = `<div class="bg-slate-800 rounded-xl p-8 text-center text-slate-400 text-sm">目前沒有追蹤的股票</div>`;
         return;
       }
+
+      container.innerHTML = stocks.map((st, idx) => {
+        const bias20 = calcBias(st.price, st.ma20);
+        const bias60 = calcBias(st.price, st.ma60);
+        const codeShown = st.displayCode || getDisplayCode(st.symbol);
+
+        return `
+          <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-lg space-y-3">
+            <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-700/80 pb-2.5">
+              <div class="flex items-center space-x-2.5">
+                <span class="text-base font-extrabold text-white font-mono bg-slate-900 px-2 py-0.5 rounded border border-slate-700">${codeShown}</span>
+                <h3 class="text-sm font-bold text-amber-400">${st.name || ''}</h3>
+                <span class="text-sm font-mono font-bold text-white ml-2">現價: ${st.price ? Number(st.price).toFixed(2) : '--'}</span>
+                ${getHitBadgeHtml(bias20, '月線')}
+                ${getHitBadgeHtml(bias60, '季線')}
+              </div>
+              <div class="flex space-x-2 text-xs">
+                <button onclick="viewStockInChartTab(${idx})" class="bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded">📊 看走勢</button>
+                <button onclick="fetchSingleStock(${idx}, true)" class="bg-slate-700 text-slate-200 px-2.5 py-1 rounded">⚡ 抓取</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              ${renderLadderTable(st.price, st.ma20, '🌙 月線 (20MA)')}
+              ${renderLadderTable(st.price, st.ma60, '🍂 季線 (60MA)')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function saveThresholds() {
+      const raw = document.getElementById('thresholdsInput').value;
+      const parsed = raw.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n) && n > 0).sort((a, b) => a - b);
+      if (!parsed.length) return alert('請輸入有效百分比');
       thresholds = [...new Set(parsed)];
-      document.getElementById('thresholdsInput').value = thresholds.join(', ');
       localStorage.setItem(STORAGE_KEY_THRESHOLDS, JSON.stringify(thresholds));
       autoSyncIfLoggedIn();
       renderStockList();
-      showStatus(`✅ 已套用乖離率階梯：±${thresholds.join('% / ±')}%`);
+      showStatus(`✅ 已套用乖離率階梯設定`);
     }
 
-    // ==========================================
-    // 【帳號與推播設定】分頁：Google 帳號登入、雲端同步與推播設定
-    // ==========================================
+    // 帳號與推播邏輯
     function updateHeaderUserUI() {
       const badge = document.getElementById('headerUserBadge');
       const icon = document.getElementById('headerUserIcon');
       const text = document.getElementById('headerUserText');
-
       if (currentUser && currentUser.email) {
         icon.textContent = '🟢';
         text.textContent = currentUser.name || currentUser.email;
-        badge.className = 'bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-600/60 text-emerald-300 text-xs px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5';
+        badge.className = 'bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 text-xs px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5';
       } else {
         icon.textContent = '👤';
         text.textContent = '未登入 (點擊設定雲端)';
-        badge.className = 'bg-slate-900 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5';
+        badge.className = 'bg-slate-900 border border-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5';
       }
     }
 
@@ -1278,33 +1098,28 @@
       if (currentUser && currentUser.email) {
         avatarEl.textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
         avatarEl.className = 'w-11 h-11 rounded-full bg-emerald-600/30 flex items-center justify-center text-lg font-bold text-emerald-300 border border-emerald-500';
-        nameEl.textContent = `${currentUser.name || 'Google 使用者'} (已綁定雲端)`;
+        nameEl.textContent = `${currentUser.name || 'Google 使用者'} (已綁定)`;
         emailEl.textContent = currentUser.email;
         btnLogin.classList.add('hidden');
         btnLogout.classList.remove('hidden');
         statusBadge.textContent = '☁️ 雲端同步已啟用';
         statusBadge.className = 'text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 font-semibold';
-        lastSyncEl.textContent = currentUser.lastSync ? `最後同步：${currentUser.lastSync}` : '已連線就緒';
+        lastSyncEl.textContent = currentUser.lastSync ? `最後同步：${currentUser.lastSync}` : '就緒';
       } else {
         avatarEl.textContent = 'G';
         avatarEl.className = 'w-11 h-11 rounded-full bg-slate-700 flex items-center justify-center text-lg font-bold text-amber-400 border border-slate-600';
         nameEl.textContent = '尚未登入 Google 帳號';
-        emailEl.textContent = '登入後可將個人喜好與推播設定自動備份至雲端';
+        emailEl.textContent = '登入後可自動備份至雲端';
         btnLogin.classList.remove('hidden');
         btnLogout.classList.add('hidden');
         statusBadge.textContent = '本地模式';
         statusBadge.className = 'text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300 font-medium';
-        lastSyncEl.textContent = '尚未雲端同步';
+        lastSyncEl.textContent = '未同步';
       }
     }
 
-    function handleGoogleLogin() {
-      document.getElementById('googleQuickModal').classList.remove('hidden');
-    }
-
-    function closeGoogleQuickModal() {
-      document.getElementById('googleQuickModal').classList.add('hidden');
-    }
+    function handleGoogleLogin() { document.getElementById('googleQuickModal').classList.remove('hidden'); }
+    function closeGoogleQuickModal() { document.getElementById('googleQuickModal').classList.add('hidden'); }
 
     function confirmQuickGoogleLogin(e) {
       e.preventDefault();
@@ -1312,234 +1127,154 @@
       const name = document.getElementById('quickGoogleName').value.trim() || email.split('@')[0];
       if (!email) return;
 
-      currentUser = {
-        email,
-        name,
-        uid: btoa(encodeURIComponent(email)).replace(/=/g, ''),
-        lastSync: formatDateTime(new Date())
-      };
+      currentUser = { email, name, uid: btoa(encodeURIComponent(email)).replace(/=/g, ''), lastSync: formatDateTime(new Date()) };
       localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
       closeGoogleQuickModal();
-
-      // 檢查該 Google 帳號是否已有儲存過的雲端偏好檔，若有則詢問或自動載入，若無則將目前設定備份上去
-      const cloudKey = `xin_cloud_backup_${currentUser.uid}`;
-      const existingCloud = localStorage.getItem(cloudKey);
-      if (existingCloud) {
-        syncFromCloud(false);
-        showStatus(`🎉 歡迎回來，${name} (${email})！已自動載入您的雲端股票清單與推播設定。`);
-      } else {
-        syncToCloud(false);
-        showStatus(`🎉 已成功登入 Google 帳號：${email}，並完成首次雲端設定備份！`);
-      }
-
+      syncToCloud(false);
       updateHeaderUserUI();
       renderAccountTab();
+      showStatus(`🎉 歡迎回來，${name}！已自動登入並備份至雲端。`);
     }
 
     function handleGoogleLogout() {
-      if (!confirm('確定要登出 Google 帳號嗎？（本地資料仍會保留）')) return;
+      if (!confirm('確定要登出 Google 帳號嗎？')) return;
       currentUser = null;
       localStorage.removeItem(STORAGE_KEY_USER);
       updateHeaderUserUI();
       renderAccountTab();
-      showStatus('已登出 Google 帳號，切換回本地儲存模式。');
+      showStatus('已登出 Google 帳號。');
     }
 
     function getFullUserProfilePayload() {
-      return {
-        updatedAt: formatDateTime(new Date()),
-        stocks: stocks,
-        thresholds: thresholds,
-        notifyConfig: notifyConfig
-      };
+      return { updatedAt: formatDateTime(new Date()), stocks, thresholds, notifyConfig };
     }
 
     function autoSyncIfLoggedIn() {
-      if (currentUser && currentUser.email) {
-        syncToCloud(false);
-      }
+      if (currentUser && currentUser.email) syncToCloud(false);
     }
 
-    // 上傳偏好與推播設定至雲端設定檔
     function syncToCloud(showNotification = true) {
       if (!currentUser || !currentUser.email) {
-        if (showNotification) {
-          alert('請先點擊「使用 Google 帳號登入」後再執行雲端同步！');
-          handleGoogleLogin();
-        }
+        if (showNotification) handleGoogleLogin();
         return;
       }
       const payload = getFullUserProfilePayload();
-      const cloudKey = `xin_cloud_backup_${currentUser.uid}`;
-      localStorage.setItem(cloudKey, JSON.stringify(payload));
-
+      localStorage.setItem(`xin_cloud_backup_${currentUser.uid}`, JSON.stringify(payload));
       currentUser.lastSync = payload.updatedAt;
       localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
-      // 同步更新跨裝置同步碼欄位
       document.getElementById('portableSyncCodeInput').value = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-
       renderAccountTab();
-      if (showNotification) {
-        showStatus(`☁️ 已成功將股票清單、乖離階梯與推播設定同步至 ${currentUser.email} 的雲端！(${payload.updatedAt})`);
-      }
+      if (showNotification) showStatus(`☁️ 已成功上傳至 ${currentUser.email} 雲端！`);
     }
 
-    // 從雲端設定檔下載還原
     function syncFromCloud(showNotification = true) {
-      if (!currentUser || !currentUser.email) {
-        if (showNotification) {
-          alert('請先登入 Google 帳號！');
-          handleGoogleLogin();
-        }
-        return;
-      }
-      const cloudKey = `xin_cloud_backup_${currentUser.uid}`;
-      const raw = localStorage.getItem(cloudKey);
-      if (!raw) {
-        if (showNotification) showStatus('⚠️ 雲端尚無備份紀錄，已自動將目前設定上傳至雲端。');
-        syncToCloud(false);
-        return;
-      }
+      if (!currentUser || !currentUser.email) return handleGoogleLogin();
+      const raw = localStorage.getItem(`xin_cloud_backup_${currentUser.uid}`);
+      if (!raw) return syncToCloud(false);
       try {
         const data = JSON.parse(raw);
         applyImportedPayload(data);
-        if (showNotification) {
-          showStatus(`⬇️ 已從 ${currentUser.email} 雲端成功載入個人喜好與推播設定！(${data.updatedAt})`);
-        }
-      } catch (e) {
-        if (showNotification) showStatus('⚠️ 雲端資料解析失敗', true);
-      }
+        if (showNotification) showStatus(`⬇️ 已從雲端還原設定！`);
+      } catch (e) {}
     }
 
     function applyImportedPayload(data) {
-      if (Array.isArray(data.stocks) && data.stocks.length) {
-        stocks = data.stocks;
-        localStorage.setItem(STORAGE_KEY_STOCKS, JSON.stringify(stocks));
-      }
-      if (Array.isArray(data.thresholds) && data.thresholds.length) {
-        thresholds = data.thresholds;
-        localStorage.setItem(STORAGE_KEY_THRESHOLDS, JSON.stringify(thresholds));
-        document.getElementById('thresholdsInput').value = thresholds.join(', ');
-      }
-      if (data.notifyConfig) {
-        notifyConfig = data.notifyConfig;
-        localStorage.setItem(STORAGE_KEY_NOTIFY, JSON.stringify(notifyConfig));
+      if (Array.isArray(data.stocks) && data.stocks.length) { stocks = data.stocks; localStorage.setItem(STORAGE_KEY_STOCKS, JSON.stringify(stocks)); }
+      if (Array.isArray(data.thresholds)) { thresholds = data.thresholds; localStorage.setItem(STORAGE_KEY_THRESHOLDS, JSON.stringify(thresholds)); document.getElementById('thresholdsInput').value = thresholds.join(', '); }
+      if (data.notifyConfig) { 
+        notifyConfig = data.notifyConfig; 
+        localStorage.setItem(STORAGE_KEY_NOTIFY, JSON.stringify(notifyConfig)); 
         document.getElementById('barkKeyInput').value = notifyConfig.barkKey || '';
         document.getElementById('webhookUrlInput').value = notifyConfig.webhookUrl || '';
-        document.getElementById('alertMinBiasInput').value = notifyConfig.minBias || 5;
+        document.getElementById('alertCondGte').checked = notifyConfig.condGte ?? true;
+        document.getElementById('alertGteValuesInput').value = notifyConfig.gteValues || '5, 10';
+        document.getElementById('alertCondLte').checked = notifyConfig.condLte ?? false;
+        document.getElementById('alertLteValuesInput').value = notifyConfig.lteValues || '';
       }
       renderStockList();
+      renderEditorList();
       renderChartTab();
       renderAccountTab();
     }
 
-    // 匯出與匯入跨裝置同步碼
     function exportSyncCode() {
-      const payload = getFullUserProfilePayload();
-      const code = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      const code = btoa(unescape(encodeURIComponent(JSON.stringify(getFullUserProfilePayload()))));
       const input = document.getElementById('portableSyncCodeInput');
       input.value = code;
       input.select();
       navigator.clipboard?.writeText(code);
-      showStatus('✅ 已產生並複製跨裝置雲端同步碼！您可貼到手機或另一台電腦瞬間還原所有設定。');
+      showStatus('✅ 已複製跨裝置同步碼！');
     }
 
     function importSyncCode() {
       const code = document.getElementById('portableSyncCodeInput').value.trim();
-      if (!code) {
-        alert('請先貼上同步碼！');
-        return;
-      }
+      if (!code) return alert('請先貼上同步碼！');
       try {
-        const jsonStr = decodeURIComponent(escape(atob(code)));
-        const data = JSON.parse(jsonStr);
-        applyImportedPayload(data);
-        showStatus('✅ 已成功透過同步碼還原所有股票清單、乖離階梯與推播設定！');
-      } catch (err) {
-        alert('同步碼格式不正確，請確認是否完整複製。');
-      }
+        applyImportedPayload(JSON.parse(decodeURIComponent(escape(atob(code)))));
+        showStatus('✅ 已成功還原設定！');
+      } catch (e) { alert('同步碼格式不正確'); }
     }
 
-    function saveFirebaseConfig() {
-      const val = document.getElementById('firebaseConfigInput').value.trim();
-      localStorage.setItem(STORAGE_KEY_FIREBASE, val);
-      showStatus('✅ 已儲存 Firebase Google Cloud 設定！');
-    }
-
-    // 儲存推播設定並同步雲端
     function saveNotifySettings() {
       notifyConfig.barkKey = document.getElementById('barkKeyInput').value.trim();
       notifyConfig.webhookUrl = document.getElementById('webhookUrlInput').value.trim();
-      notifyConfig.minBias = parseFloat(document.getElementById('alertMinBiasInput').value) || 5;
+      notifyConfig.condGte = document.getElementById('alertCondGte').checked;
+      notifyConfig.gteValues = document.getElementById('alertGteValuesInput').value.trim();
+      notifyConfig.condLte = document.getElementById('alertCondLte').checked;
+      notifyConfig.lteValues = document.getElementById('alertLteValuesInput').value.trim();
+
       localStorage.setItem(STORAGE_KEY_NOTIFY, JSON.stringify(notifyConfig));
       autoSyncIfLoggedIn();
-      showStatus('✅ 推播設定已儲存' + (currentUser ? `並自動同步至 ${currentUser.email} 雲端！` : '！'));
+      showStatus('✅ 推播設定已儲存！');
     }
 
     async function dispatchNotification(title, bodyText) {
-      let sentAny = false;
       if (notifyConfig.barkKey) {
         let baseUrl = notifyConfig.barkKey.replace(/\/+$/, '');
-        if (!baseUrl.startsWith('http')) {
-          baseUrl = `https://api.day.app/${baseUrl}`;
-        }
-        const url = `${baseUrl}/${encodeURIComponent(title)}/${encodeURIComponent(bodyText)}?group=StockMA`;
-        try {
-          await fetch(url);
-          sentAny = true;
-        } catch (e) {
-          console.error('Bark push error:', e);
-        }
+        if (!baseUrl.startsWith('http')) baseUrl = `https://api.day.app/${baseUrl}`;
+        try { await fetch(`${baseUrl}/${encodeURIComponent(title)}/${encodeURIComponent(bodyText)}?group=StockMA`); } catch (e) {}
       }
-
       if (notifyConfig.webhookUrl) {
-        try {
-          await fetch(notifyConfig.webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: `**${title}**\n${bodyText}` })
-          });
-          sentAny = true;
-        } catch (e) {
-          console.error('Webhook push error:', e);
-        }
+        try { await fetch(notifyConfig.webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: `**${title}**\n${bodyText}` }) }); } catch (e) {}
       }
-      return sentAny;
     }
 
     async function sendTestNotification() {
       saveNotifySettings();
-      if (!notifyConfig.barkKey && !notifyConfig.webhookUrl) {
-        alert('請先填入 Bark 網址/Key 或 Webhook 網址！');
-        return;
-      }
-      const nowStr = formatDateTime(new Date());
-      const ok = await dispatchNotification(
-        '📈 股票乖離率測試推播',
-        `2330 台積電 現價達季線 +10% 階梯\n更新時間：${nowStr}`
-      );
-      if (ok) {
-        alert('已發送測試推播！請檢查您的 iPhone 或通訊軟體。');
-      } else {
-        alert('發送失敗，請確認網址或 Key 是否正確。');
-      }
+      if (!notifyConfig.barkKey && !notifyConfig.webhookUrl) return alert('請先填入推播網址！');
+      await dispatchNotification('📈 測試推播', `測試時間：${formatDateTime(new Date())}`);
+      alert('已發送測試推播！');
     }
 
     async function checkAndSendAlerts(targetStocks) {
       if (!notifyConfig.barkKey && !notifyConfig.webhookUrl) return;
-      const minBias = notifyConfig.minBias || 5;
+
+      const parseNums = (str) => (str || '').split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+      const gteArr = notifyConfig.condGte ? parseNums(notifyConfig.gteValues) : [];
+      const lteArr = notifyConfig.condLte ? parseNums(notifyConfig.lteValues) : [];
+
       const lines = [];
 
       targetStocks.forEach(st => {
         const b20 = calcBias(st.price, st.ma20);
         const b60 = calcBias(st.price, st.ma60);
         const hits = [];
-        if (b20 !== null && Math.abs(b20) >= minBias) {
-          hits.push(`月線 ${b20 > 0 ? '+' : ''}${b20.toFixed(1)}%`);
-        }
-        if (b60 !== null && Math.abs(b60) >= minBias) {
-          hits.push(`季線 ${b60 > 0 ? '+' : ''}${b60.toFixed(1)}%`);
-        }
+
+        const checkMatch = (bias, label) => {
+          if (bias === null) return;
+          const absB = Math.abs(bias);
+          
+          if (gteArr.some(t => absB >= t)) {
+            hits.push(`${label} 絕對值達 ≥ ${t}% (${bias > 0 ? '+' : ''}${bias.toFixed(1)}%)`);
+          }
+          if (lteArr.some(t => bias <= t)) {
+            hits.push(`${label} 達 ≤ ${t}% (${bias > 0 ? '+' : ''}${bias.toFixed(1)}%)`);
+          }
+        };
+
+        checkMatch(b20, '月線');
+        checkMatch(b60, '季線');
+
         if (hits.length > 0) {
           lines.push(`${st.displayCode} ${st.name} (現價 ${st.price}): ${hits.join(' / ')}`);
         }
@@ -1548,7 +1283,7 @@
       if (lines.length > 0) {
         const timeStr = formatDateTime(new Date());
         await dispatchNotification(
-          `🔔 均線乖離達標提醒 (${lines.length}檔)`,
+          `🔔 均線乖離觸發提醒 (${lines.length}檔)`,
           `${lines.join('\n')}\n更新：${timeStr}`
         );
       }
