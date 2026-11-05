@@ -7,6 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js 繪製互動式股價與均線走勢圖 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Google GIS SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
     .badge-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
@@ -1109,7 +1112,15 @@
       showStatus(`✅ 已套用乖離率階梯設定`);
     }
 
-    // 帳號與推播邏輯
+ // ==========================================
+    // Google Drive API 雲端同步與帳號邏輯
+    // ==========================================
+    const GOOGLE_CLIENT_ID = '1040476010963-i2rhd5b8kbde7lmu3q48pct8nh7ps1b8.apps.googleusercontent.com';
+    const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+
+    let tokenClient = null;
+    let accessToken = null;
+
     function updateHeaderUserUI() {
       const badge = document.getElementById('headerUserBadge');
       const icon = document.getElementById('headerUserIcon');
@@ -1141,14 +1152,14 @@
         emailEl.textContent = currentUser.email;
         btnLogin.classList.add('hidden');
         btnLogout.classList.remove('hidden');
-        statusBadge.textContent = '☁️ 雲端同步已啟用';
+        statusBadge.textContent = '☁️ 雲端硬碟同步已啟用';
         statusBadge.className = 'text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 font-semibold';
         lastSyncEl.textContent = currentUser.lastSync ? `最後同步：${currentUser.lastSync}` : '就緒';
       } else {
         avatarEl.textContent = 'G';
         avatarEl.className = 'w-11 h-11 rounded-full bg-slate-700 flex items-center justify-center text-lg font-bold text-amber-400 border border-slate-600';
         nameEl.textContent = '尚未登入 Google 帳號';
-        emailEl.textContent = '登入後可自動備份至雲端';
+        emailEl.textContent = '登入後可自動備份至 Google 雲端硬碟';
         btnLogin.classList.remove('hidden');
         btnLogout.classList.add('hidden');
         statusBadge.textContent = '本地模式';
@@ -1157,26 +1168,59 @@
       }
     }
 
-    function handleGoogleLogin() { document.getElementById('googleQuickModal').classList.remove('hidden'); }
-    function closeGoogleQuickModal() { document.getElementById('googleQuickModal').classList.add('hidden'); }
+    function initGoogleAuth() {
+      if (window.google) {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: SCOPES,
+          callback: (response) => {
+            if (response.error !== undefined) {
+              showStatus('⚠️ Google 授權失敗', true);
+              return;
+            }
+            accessToken = response.access_token;
+            fetchGoogleUserInfo();
+          },
+        });
+      }
+    }
 
-    function confirmQuickGoogleLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById('quickGoogleEmail').value.trim().toLowerCase();
-      const name = document.getElementById('quickGoogleName').value.trim() || email.split('@')[0];
-      if (!email) return;
+    function handleGoogleLogin() {
+      if (!tokenClient) {
+        initGoogleAuth();
+      }
+      if (tokenClient) {
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+      } else {
+        alert('Google API 載入中，請稍後再試');
+      }
+    }
 
-      currentUser = { email, name, uid: btoa(encodeURIComponent(email)).replace(/=/g, ''), lastSync: formatDateTime(new Date()) };
-      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
-      closeGoogleQuickModal();
-      syncToCloud(false);
-      updateHeaderUserUI();
-      renderAccountTab();
-      showStatus(`🎉 歡迎回來，${name}！已自動登入並備份至雲端。`);
+    async function fetchGoogleUserInfo() {
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const info = await res.json();
+        currentUser = {
+          email: info.email,
+          name: info.name,
+          picture: info.picture,
+          lastSync: formatDateTime(new Date())
+        };
+        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
+        updateHeaderUserUI();
+        renderAccountTab();
+        showStatus(`🎉 成功登入 Google 帳號：${info.email}`);
+        syncFromCloud(false);
+      } catch (e) {
+        showStatus('⚠️ 無法取得 Google 用戶資訊', true);
+      }
     }
 
     function handleGoogleLogout() {
       if (!confirm('確定要登出 Google 帳號嗎？')) return;
+      accessToken = null;
       currentUser = null;
       localStorage.removeItem(STORAGE_KEY_USER);
       updateHeaderUserUI();
@@ -1189,32 +1233,99 @@
     }
 
     function autoSyncIfLoggedIn() {
-      if (currentUser && currentUser.email) syncToCloud(false);
+      if (currentUser && currentUser.email && accessToken) syncToCloud(false);
     }
 
-    function syncToCloud(showNotification = true) {
-      if (!currentUser || !currentUser.email) {
-        if (showNotification) handleGoogleLogin();
+    async function syncToCloud(showNotification = true) {
+      if (!accessToken) {
+        handleGoogleLogin();
         return;
       }
+
       const payload = getFullUserProfilePayload();
-      localStorage.setItem(`xin_cloud_backup_${currentUser.uid}`, JSON.stringify(payload));
-      currentUser.lastSync = payload.updatedAt;
-      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
-      document.getElementById('portableSyncCodeInput').value = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-      renderAccountTab();
-      if (showNotification) showStatus(`☁️ 已成功上傳至 ${currentUser.email} 雲端！`);
+      const fileContent = JSON.stringify(payload, null, 2);
+      const fileName = 'stock_tracker_backup.json';
+
+      try {
+        if (showNotification) showStatus('☁️ 正在上傳備份至您的 Google 雲端硬碟...');
+
+        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appdataFolder&q=name='${fileName}'`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const searchJson = await searchRes.json();
+        const existingFile = searchJson.files && searchJson.files[0];
+
+        const metadata = {
+          name: fileName,
+          mimeType: 'application/json',
+          parents: existingFile ? undefined : ['appdataFolder']
+        };
+
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', new Blob([fileContent], { type: 'application/json' }));
+
+        let uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+        let method = 'POST';
+
+        if (existingFile) {
+          uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${existingFile.id}?uploadType=multipart`;
+          method = 'PATCH';
+        }
+
+        const uploadRes = await fetch(uploadUrl, {
+          method: method,
+          headers: { Authorization: `Bearer ${accessToken}` },
+          body: form
+        });
+
+        if (uploadRes.ok) {
+          currentUser.lastSync = formatDateTime(new Date());
+          localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
+          renderAccountTab();
+          if (showNotification) showStatus('✅ 成功上傳 JSON 備份至您的 Google 雲端硬碟！');
+        } else {
+          throw new Error('Upload failed');
+        }
+      } catch (e) {
+        if (showNotification) showStatus('⚠️ 雲端上傳失敗，請重新登入 Google', true);
+        accessToken = null;
+      }
     }
 
-    function syncFromCloud(showNotification = true) {
-      if (!currentUser || !currentUser.email) return handleGoogleLogin();
-      const raw = localStorage.getItem(`xin_cloud_backup_${currentUser.uid}`);
-      if (!raw) return syncToCloud(false);
+    async function syncFromCloud(showNotification = true) {
+      if (!accessToken) {
+        handleGoogleLogin();
+        return;
+      }
+
+      const fileName = 'stock_tracker_backup.json';
+
       try {
-        const data = JSON.parse(raw);
-        applyImportedPayload(data);
-        if (showNotification) showStatus(`⬇️ 已從雲端還原設定！`);
-      } catch (e) {}
+        if (showNotification) showStatus('⬇️ 正在從 Google 雲端硬碟同步資料...');
+
+        const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appdataFolder&q=name='${fileName}'`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const searchJson = await searchRes.json();
+        const existingFile = searchJson.files && searchJson.files[0];
+
+        if (!existingFile) {
+          if (showNotification) showStatus('⚠️ 雲端尚無備份檔案，將自動上傳目前本地設定');
+          syncToCloud(false);
+          return;
+        }
+
+        const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${existingFile.id}?alt=media`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const cloudData = await fileRes.json();
+
+        applyImportedPayload(cloudData);
+        if (showNotification) showStatus('✅ 已成功從 Google 雲端還原所有設定與股票清單！');
+      } catch (e) {
+        if (showNotification) showStatus('⚠️ 從雲端讀取失敗', true);
+      }
     }
 
     function applyImportedPayload(data) {
